@@ -64,7 +64,9 @@ const App: React.FC = () => {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&accept-language=zh`);
       const data = await response.json();
-      return data.address?.city || data.address?.town || data.address?.municipality || data.address?.province || '自定义地点';
+      const addr = data.address || {};
+      // 优先获取城市名，避开区名（suburb）
+      return addr.city || addr.town || addr.municipality || addr.city_district || addr.province || '自定义地点';
     } catch (error) {
       console.error('Failed to fetch city name:', error);
       return '自定义地点';
