@@ -1,0 +1,7 @@
+{
+  "name": "CityPaper - Map Wallpaper Generator",
+  "description": "Create stunning minimalist map wallpapers for your phone in light and dark modes. Powered by Gemini for city intelligence and high-quality map visuals.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
