@@ -7,14 +7,13 @@ export enum MapMode {
 }
 
 export interface CityInfo {
+  id: string;
   name: string;
   lat: number;
   lng: number;
   description: string;
   country: string;
   accentColor: string;
-  // Added sourceUrls to comply with Google Maps grounding requirements
-  sourceUrls?: string[];
 }
 
 export interface MapStyle {

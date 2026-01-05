@@ -42,8 +42,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels }
     }).addTo(mapInstanceRef.current);
 
     return () => {
-      // Don't destroy on every re-render to keep it smooth, 
-      // but we should clean up on unmount
+      // Clean up on unmount logic if needed
     };
   }, [city.lat, city.lng, style, zoom]);
 
@@ -61,26 +60,26 @@ const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels }
           className="absolute bottom-16 left-0 right-0 px-8 flex flex-col items-center text-center z-10 animate-fade-in pointer-events-none"
           style={{ color: style.textColor }}
         >
-          <div className="w-12 h-[2px] mb-4 opacity-50" style={{ backgroundColor: city.accentColor }} />
-          <h1 className="text-4xl font-extrabold tracking-tight uppercase leading-none drop-shadow-lg">
+          <div className="w-12 h-[2px] mb-5 opacity-50" style={{ backgroundColor: city.accentColor }} />
+          <h1 className="text-5xl font-extrabold tracking-[0.1em] leading-none drop-shadow-lg">
             {city.name}
           </h1>
-          <p className="text-sm font-medium tracking-[0.3em] uppercase opacity-70 mt-1 drop-shadow-md">
+          <p className="text-xs font-bold tracking-[0.5em] uppercase opacity-50 mt-2 drop-shadow-md">
             {city.country}
           </p>
-          <div className="mt-4 flex flex-col items-center opacity-40">
-            <p className="text-[10px] font-mono tracking-widest leading-relaxed">
+          <div className="mt-6 flex flex-col items-center opacity-30">
+            <p className="text-[9px] font-mono tracking-widest leading-relaxed">
               {city.lat.toFixed(4)}° N / {city.lng.toFixed(4)}° E
             </p>
           </div>
-          <p className="mt-6 text-xs font-light tracking-wide italic max-w-[80%] opacity-80 leading-relaxed">
-            "{city.description}"
+          <p className="mt-8 text-[11px] font-light tracking-[0.05em] max-w-[85%] opacity-80 leading-relaxed border-t border-white/10 pt-4">
+            {city.description}
           </p>
         </div>
       )}
 
-      {/* Minimalist Grid Pattern Overlay (Optional Aesthetic) */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
+      {/* Minimalist Grid Pattern Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" />
     </div>
   );
 };
