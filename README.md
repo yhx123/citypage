@@ -1,4 +1,4 @@
-# CityPaper - 城市地图壁纸自动化生成引擎
+# CityPaper - 城市地图 wallpaper 自动化生成引擎
 
 CityPaper 是一个专为手机壁纸设计的 minimalist 地图渲染工具。它采用“配置即接口”的设计理念，支持通过 URL 参数精准控制地图状态，并具备高清批量导出能力。
 
@@ -8,13 +8,10 @@ CityPaper 是一个专为手机壁纸设计的 minimalist 地图渲染工具。�
 
 本项目采用 **纯 ESM (ES Modules) 架构**，无需复杂的 `npm install` 或 `npm build` 过程。
 
-1.  **准备环境**：确保你的电脑安装了浏览器（推荐 Chrome/Edge）。
+1.  **准备环境**：确保你的电脑安装了浏览器。
 2.  **启动本地服务**：
-    -   **VS Code 用户**：安装 `Live Server` 插件，右键点击 `index.html` 选择 `Open with Live Server`。
-    -   **命令行用户**：在项目根目录运行 `python -m http.server 8000` 或 `npx serve`。
+    -   **命令行用户**：在项目根目录运行 `python -m http.server 8000`。
 3.  **访问应用**：打开浏览器访问 `http://localhost:8000`。
-
-> **💡 注意**：由于浏览器跨域安全限制，直接双击打开 `index.html` 文件（`file://` 协议）可能会导致地图切片或 ESM 模块加载失败，请务必通过本地 HTTP 服务访问。
 
 ---
 
@@ -27,36 +24,42 @@ CityPaper 是一个专为手机壁纸设计的 minimalist 地图渲染工具。�
 | :--- | :--- | :--- |
 | `lat` | 纬度 | `31.23` |
 | `lng` | 经度 | `121.47` |
-| `z` | 缩放级别 | `10` (城市) 到 `18` (街道) |
+| `z` | 缩放级别 | `10` 到 `18` |
 | `s` | 地图风格 | `dark`, `light`, `silver`, `retro` |
-| `c` | 装饰色 (Hex) | `ff3b30` (红色), `007aff` (蓝色) |
+| `c` | 装饰色 (Hex) | `ff3b30` |
 | `r` | **屏幕比例** | `9:16`, `9:19`, `9:19.5`, `9:21` |
-| `name` | 标签名称 | 任意字符串 (用于导出文件名) |
-| `debug` | 调试模式 | `true` (显示参数面板) |
 
-**综合示例**：
-`index.html?lat=30.57&lng=104.06&z=14&s=dark&c=af52de&r=9:19.5&name=成都暗色版`
+---
 
-### 2. 自动化工作流建议
-如果你需要将此工具集成到自动化脚本（如 Puppeteer 或 Playwright）中：
-1.  构造带有参数的 URL。
-2.  导航至该页面。
-3.  等待地图瓦片加载完成（通常延迟 1-2 秒）。
-4.  在控制台执行 `verifyExportAPI()` 或直接通过应用内的“一键导出”按钮触发下载。
+## 💻 命令行测试 (CLI & Curl)
+
+虽然本应用是前端渲染，但你可以使用以下命令验证服务状态或进行自动化截图。
+
+### 1. 连通性测试 (Curl)
+验证本地服务器是否正常响应请求：
+```bash
+curl -I "http://localhost:8000/?lat=31.23&lng=121.47&z=15&s=silver&c=ff00ff&r=9:19.5"
+```
+*预期返回：`HTTP/1.0 200 OK`*
+
+### 2. 自动化截图测试 (Shot-Scraper)
+如果你安装了 [shot-scraper](https://shot-scraper.datasette.io/)，可以直接从命令行生成壁纸：
+```bash
+shot-scraper "http://localhost:8000/?lat=22.54&lng=114.05&s=dark&r=9:19.5" \
+  --selector '[data-testid="wallpaper-canvas"]' \
+  --scale 3 \
+  -o shenzhen_wallpaper.png
+```
 
 ---
 
 ## ⚠️ 导出注意事项 (Export Tips)
 
--   **多文件下载权限**：在使用“批量导出”功能时，浏览器可能会弹出“此网站尝试下载多个文件”的提示，请点击 **“允许”**，否则只会下载第一个城市。
--   **渲染等待**：高清导出时，为了确保地图切片完整加载，程序设置了 1000ms 的强制等待。如果网络环境较差，建议增加等待时间。
--   **高清采样**：导出的图片默认为 **3 倍像素密度 (3x)**，足以适配最新的 Retina 屏幕。
-
----
+-   **多文件下载权限**：批量导出时请点击浏览器弹窗中的 **“允许”**。
+-   **高清采样**：导出的图片默认为 **3 倍像素密度 (3x)**。
 
 ## 📁 目录结构
 
--   `App.tsx`: 核心逻辑、URL 参数解析与导出引擎。
--   `components/MapPreview.tsx`: 基于 Leaflet 的高清地图组件。
--   `constants.tsx`: 预设城市数据与风格模板。
+-   `App.tsx`: 核心逻辑与导出引擎。
+-   `components/MapPreview.tsx`: 高清地图组件。
 -   `TESTING.md`: 完整的 API 自动化验证脚本。

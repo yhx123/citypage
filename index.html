@@ -6,15 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CityPaper - Map Wallpaper Generator</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- 移除 integrity 属性，提高 CDN 加载兼容性 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #0a0a0a;
+      background-color: #050505;
       color: #ffffff;
       margin: 0;
-      overflow-x: hidden;
+      overflow: hidden;
+    }
+    #root {
+      height: 100vh;
+      width: 100vw;
     }
     .leaflet-control-container {
       display: none !important;
@@ -29,25 +35,28 @@
       background: #333;
       border-radius: 10px;
     }
-    /* 隐藏导出时的干扰元素 */
     .exporting-active .no-export {
       display: none !important;
+    }
+    .leaflet-container {
+      background: #0a0a0a !important;
+      outline: none;
     }
   </style>
 <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "html-to-image": "https://esm.sh/html-to-image@^1.11.11",
+    "lucide-react": "https://esm.sh/lucide-react@0.475.0",
+    "html-to-image": "https://esm.sh/html-to-image@1.11.11",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react": "https://esm.sh/react@19.0.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body>
   <div id="root"></div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
 </html>
