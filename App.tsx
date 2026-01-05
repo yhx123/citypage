@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [showLabels, setShowLabels] = useState(true);
   const [aspectRatio, setAspectRatio] = useState(RATIO_PRESETS[2]);
   const [isExporting, setIsExporting] = useState(false);
-  
+
   const [manualLat, setManualLat] = useState(DEFAULT_CITY.lat.toString());
   const [manualLng, setManualLng] = useState(DEFAULT_CITY.lng.toString());
 
@@ -33,12 +33,23 @@ const App: React.FC = () => {
     const lng = parseFloat(params.get('lng') || '');
     const s = params.get('s');
     const r = params.get('r');
+    const exportMode = params.get('export') === 'true';
 
     if (!isNaN(lat) && !isNaN(lng)) {
-      setCity(prev => ({ ...prev, lat, lng, id: 'custom', name: params.get('name') || '自定义地点' }));
+      const name = params.get('name');
+      if (name) {
+        setCity(prev => ({ ...prev, lat, lng, id: 'custom', name }));
+      } else {
+        // 如果没有提供名称，尝试根据坐标获取
+        setCity(prev => ({ ...prev, lat, lng, id: 'custom', name: '加载中...' }));
+        fetchCityName(lat, lng).then(fetchedName => {
+          setCity(prev => ({ ...prev, lat, lng, id: 'custom', name: fetchedName }));
+        });
+      }
       setManualLat(lat.toString());
       setManualLng(lng.toString());
     }
+
     if (s) {
       const style = MAP_STYLES.find(st => st.id === s);
       if (style) setSelectedStyle(style);
@@ -49,14 +60,25 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const fetchCityName = async (lat: number, lng: number): Promise<string> => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&accept-language=zh`);
+      const data = await response.json();
+      return data.address?.city || data.address?.town || data.address?.municipality || data.address?.province || '自定义地点';
+    } catch (error) {
+      console.error('Failed to fetch city name:', error);
+      return '自定义地点';
+    }
+  };
+
   const handleDownload = async () => {
     if (!previewRef.current || isExporting) return;
-    
+
     setIsExporting(true);
     try {
       // 增加等待时间，确保地图切片（Tiles）和字体完全渲染
       await new Promise(resolve => setTimeout(resolve, 2500));
-      
+
       const dataUrl = await htmlToImage.toPng(previewRef.current, {
         quality: 1.0,
         pixelRatio: 3, // 3倍高清导出
@@ -65,7 +87,7 @@ const App: React.FC = () => {
           borderRadius: '0', // 强制导出时无圆角
         }
       });
-      
+
       const link = document.createElement('a');
       link.download = `CityPaper_${city.name}_${selectedStyle.id}.png`;
       link.href = dataUrl;
@@ -80,7 +102,7 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen w-screen bg-[#050505] text-white flex flex-col md:flex-row overflow-hidden font-sans">
-      
+
       {/* 左侧控制栏 */}
       <aside className="w-full md:w-[380px] border-r border-zinc-900 p-8 flex flex-col gap-10 z-50 bg-[#080808] shrink-0">
         <div className="flex items-center gap-4">
@@ -99,9 +121,9 @@ const App: React.FC = () => {
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">屏幕比例</label>
             <div className="grid grid-cols-2 gap-2">
               {RATIO_PRESETS.map((p) => (
-                <button 
-                  key={p.id} 
-                  onClick={() => setAspectRatio(p)} 
+                <button
+                  key={p.id}
+                  onClick={() => setAspectRatio(p)}
                   className={`py-3 rounded-xl border text-[11px] font-bold transition-all ${aspectRatio.id === p.id ? 'bg-white text-black border-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
                 >
                   {p.name}
@@ -115,7 +137,7 @@ const App: React.FC = () => {
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">快速城市</label>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_CITIES.slice(0, 6).map(c => (
-                <button 
+                <button
                   key={c.id}
                   onClick={() => { setCity(c); setManualLat(c.lat.toString()); setManualLng(c.lng.toString()); }}
                   className={`py-2 rounded-lg text-[10px] font-bold transition-all border ${city.id === c.id ? 'bg-zinc-800 border-zinc-600 text-white' : 'bg-transparent border-zinc-900 text-zinc-600'}`}
@@ -131,9 +153,9 @@ const App: React.FC = () => {
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">视觉方案</label>
             <div className="grid grid-cols-2 gap-2">
               {MAP_STYLES.map((style) => (
-                <button 
-                  key={style.id} 
-                  onClick={() => setSelectedStyle(style)} 
+                <button
+                  key={style.id}
+                  onClick={() => setSelectedStyle(style)}
                   className={`py-3 px-2 rounded-xl border text-[10px] font-black transition-all ${selectedStyle.id === style.id ? 'bg-zinc-100 text-black border-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}
                 >
                   {style.name}
@@ -163,29 +185,47 @@ const App: React.FC = () => {
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full" />
         </div>
-        
+
         {/* 手机边框容器 (仅限 UI 预览，不参与导出) */}
-        <div 
-          className="relative w-full max-w-[340px] p-2 bg-zinc-900 rounded-[3rem] border-[1px] border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] group"
-          style={{ 
-            aspectRatio: aspectRatio.id.replace(':', '/'),
-            maxHeight: '85vh'
-          }}
-        >
-          {/* 内嵌的导出目标 (previewRef) - 下载的内容是这里的 100% 画面 */}
-          <div 
+        {!new URLSearchParams(window.location.search).get('export') ? (
+          <div
+            className="relative w-full max-w-[340px] p-2 bg-zinc-900 rounded-[3rem] border-[1px] border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] group"
+            style={{
+              aspectRatio: aspectRatio.id.replace(':', '/'),
+              maxHeight: '85vh'
+            }}
+          >
+            {/* 内嵌的导出目标 (previewRef) - 下载的内容是这里的 100% 画面 */}
+            <div
+              ref={previewRef}
+              data-testid="wallpaper-canvas"
+              className="w-full h-full overflow-hidden rounded-[2.5rem]"
+            >
+              <MapPreview city={city} style={selectedStyle} zoom={zoom} showLabels={showLabels} />
+            </div>
+
+            {/* 装饰物：听筒/传感器区域 */}
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#080808] rounded-full z-30 flex items-center justify-center gap-2">
+              <div className="w-1 h-1 rounded-full bg-zinc-800" />
+              <div className="w-8 h-1 rounded-full bg-zinc-800" />
+            </div>
+          </div>
+        ) : (
+          /* 导出模式：直接显示画布，无边框，无圆角 */
+          <div
             ref={previewRef}
-            className="w-full h-full overflow-hidden rounded-[2.5rem]"
+            data-testid="wallpaper-canvas"
+            className="w-full h-full"
+            style={{
+              aspectRatio: aspectRatio.id.replace(':', '/'),
+              maxHeight: '100vh',
+              width: 'auto',
+              height: '100vh'
+            }}
           >
             <MapPreview city={city} style={selectedStyle} zoom={zoom} showLabels={showLabels} />
           </div>
-
-          {/* 装饰物：听筒/传感器区域 */}
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 w-20 h-5 bg-[#080808] rounded-full z-30 flex items-center justify-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-zinc-800" />
-            <div className="w-8 h-1 rounded-full bg-zinc-800" />
-          </div>
-        </div>
+        )}
 
         {/* 实时参数提示 */}
         <div className="absolute bottom-10 right-10 flex gap-4 text-zinc-700 text-[10px] font-mono uppercase tracking-widest hidden lg:flex">

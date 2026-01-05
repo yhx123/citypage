@@ -55,13 +55,36 @@ curl -I "http://localhost:8000/?lat=31.23&lng=121.47&z=15&s=silver&c=ff00ff&r=9:
 *预期返回：`HTTP/1.0 200 OK`*
 
 ### 2. 自动化截图测试 (Shot-Scraper)
-如果你安装了 [shot-scraper](https://shot-scraper.datasette.io/)，可以直接从命令行生成壁纸：
+
+[shot-scraper](https://shot-scraper.datasette.io/) 是一个强大的命令行截图工具。你可以利用它实现壁纸的批量自动化生成。
+
+#### 1) 安装
 ```bash
-shot-scraper "http://localhost:8000/?lat=22.54&lng=114.05&s=dark&r=9:19.5" \
+# 使用 pip 安装
+pip install shot-scraper
+
+# 关键步骤：安装浏览器驱动
+playwright install
+```
+
+> [!IMPORTANT]
+> `playwright install` 这一步至关重要。如果缺少它，运行截图时会报错 `Executable doesn't exist`。
+
+#### 2) 生成壁纸
+确保开发服务器正在运行（通常是 `http://localhost:5173`），然后运行：
+
+```bash
+shot-scraper "http://127.0.0.1:5173/?lat=22.54&lng=114.05&s=dark&r=9:19.5" \
   --selector '[data-testid="wallpaper-canvas"]' \
-  --scale 3 \
+  --scale-factor 3 \
+  --wait 3000 \
   -o shenzhen_wallpaper.png
 ```
+
+**参数详解：**
+-   `--selector`: 指定截取的 DOM 元素，这里我们截取壁纸预览中心区域。
+-   `--scale-factor 3`: 3 倍采样率（对应参数 `--scale-factor`），确保输出图为超清分辨率。
+-   `-o`: 输出文件名。
 
 ---
 
