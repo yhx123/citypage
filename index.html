@@ -29,12 +29,16 @@
       background: #333;
       border-radius: 10px;
     }
+    /* 隐藏导出时的干扰元素 */
+    .exporting-active .no-export {
+      display: none !important;
+    }
   </style>
 <script type="importmap">
 {
   "imports": {
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "html-to-image": "https://esm.sh/html-to-image@^1.11.11",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3"
