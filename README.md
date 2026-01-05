@@ -6,12 +6,24 @@ CityPaper 是一个专为手机壁纸设计的 minimalist 地图渲染工具。�
 
 ## 🚀 快速启动 (Quick Start)
 
-本项目采用 **纯 ESM (ES Modules) 架构**，无需复杂的 `npm install` 或 `npm build` 过程。
+本项目基于 **Vite + React** 构建，请按照以下步骤启动：
 
-1.  **准备环境**：确保你的电脑安装了浏览器。
-2.  **启动本地服务**：
-    -   **命令行用户**：在项目根目录运行 `python -m http.server 8000`。
-3.  **访问应用**：打开浏览器访问 `http://localhost:8000`。
+1.  **安装依赖**：
+    ```bash
+    npm install
+    ```
+2.  **启动开发服务器**：
+    ```bash
+    npm run dev
+    ```
+3.  **访问应用**：在浏览器中打开生成的地址（默认通常是 `http://localhost:3000`）。
+
+### 生产环境构建
+若需部署到生产环境，请运行：
+```bash
+npm run build
+```
+生成的静态文件将存放在 `dist` 目录中。
 
 ---
 
