@@ -38,7 +38,8 @@ npm run build
 | `lng` | 经度 | `121.47` |
 | `z` | 缩放级别 | `10` 到 `18` |
 | `s` | 地图风格 | `dark`, `light`, `silver`, `retro` |
-| `c` | 装饰色 (Hex) | `ff3b30` |
+| `name` | 城市名称 | `深圳` |
+| `desc` | 标语描述 | `Shenzhen: Silicon Valley of Hardware` |
 | `r` | **屏幕比例** | `9:16`, `9:19`, `9:19.5`, `9:21` |
 
 ---
@@ -71,10 +72,11 @@ playwright install
 > `playwright install` 这一步至关重要。如果缺少它，运行截图时会报错 `Executable doesn't exist`。
 
 #### 2) 生成壁纸
-确保开发服务器正在运行（通常是 `http://localhost:5173`），然后运行：
+确保开发服务器正在运行（通常是 `http://localhost:3000`），然后运行：
 
 ```bash
-shot-scraper "http://127.0.0.1:5173/?lat=22.54&lng=114.05&s=dark&r=9:19.5" \
+# 生成带有自定义名称和标语的壁纸
+shot-scraper "http://127.0.0.1:3000/?lat=22.54&lng=114.05&s=dark&r=9:19.5&name=深圳&desc=创新之城" \
   --selector '[data-testid="wallpaper-canvas"]' \
   --scale-factor 3 \
   --wait 3000 \

@@ -7,9 +7,10 @@ interface MapPreviewProps {
   style: MapStyle;
   zoom: number;
   showLabels: boolean;
+  onMapClick?: (lat: number, lng: number) => void;
 }
 
-const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels }) => {
+const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels, onMapClick }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
@@ -47,10 +48,17 @@ const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels }
           zoomAnimation: false,
           markerZoomAnimation: false
         });
+
+        // 添加点击事件监听
+        mapInstanceRef.current.on('click', (e: any) => {
+          if (onMapClick) {
+            onMapClick(e.latlng.lat, e.latlng.lng);
+          }
+        });
       }
 
       const map = mapInstanceRef.current;
-      
+
       // 更新视图
       map.setView([city.lat, city.lng], zoom);
 
@@ -71,7 +79,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels }
       resizeObserver.observe(mapContainerRef.current);
 
       return () => resizeObserver.disconnect();
-      
+
     } catch (err) {
       console.error("Leaflet Error:", err);
       setError("地图引擎加载异常");
@@ -82,29 +90,29 @@ const MapPreview: React.FC<MapPreviewProps> = ({ city, style, zoom, showLabels }
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
       {/* 真正承载地图的层 */}
-      <div 
-        ref={mapContainerRef} 
+      <div
+        ref={mapContainerRef}
         className="absolute inset-0 w-full h-full z-0"
         style={{ background: '#0a0a0a' }}
       />
-      
+
       {/* 渐变遮罩层（增强文字可读性） */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/50 z-10" />
 
       {/* 信息标签层 */}
       {showLabels && (
-        <div 
+        <div
           className="absolute bottom-[10%] left-0 right-0 px-10 flex flex-col items-center text-center z-20 pointer-events-none"
           style={{ color: style.textColor }}
         >
           {/* 装饰线条 */}
           <div className="w-10 h-[2px] mb-6 opacity-80" style={{ backgroundColor: city.accentColor }} />
-          
+
           {/* 城市名称 */}
           <h1 className="text-5xl font-black tracking-[0.15em] drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
             {city.name}
           </h1>
-          
+
           {/* 国家/副标题 */}
           <p className="text-[10px] font-bold tracking-[0.6em] uppercase opacity-40 mt-3 pl-[0.6em]">
             {city.country}

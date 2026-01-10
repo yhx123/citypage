@@ -46,24 +46,42 @@ const App: React.FC = () => {
     const al = params.get('al') as AdminLevel;
     const exportMode = params.get('export') === 'true';
 
+    const nameParam = params.get('name');
+    const descParam = params.get('desc');
+
     if (al && ADMIN_LEVELS.some(level => level.id === al)) {
       setAdminLevel(al);
     }
 
     if (!isNaN(lat) && !isNaN(lng)) {
-      const name = params.get('name');
-      if (name) {
-        setCity(prev => ({ ...prev, lat, lng, id: 'custom', name }));
-      } else {
+      setCity(prev => ({
+        ...prev,
+        lat,
+        lng,
+        id: 'custom',
+        name: nameParam || prev.name,
+        description: descParam !== null ? descParam : prev.description
+      }));
+
+      if (!nameParam) {
         // 如果没有提供名称，尝试根据坐标获取
-        setCity(prev => ({ ...prev, lat, lng, id: 'custom', name: '加载中...' }));
+        setCity(prev => ({ ...prev, name: '加载中...' }));
         fetchCityName(lat, lng, al || 'city').then(fetchedName => {
-          setCity(prev => ({ ...prev, lat, lng, id: 'custom', name: fetchedName }));
+          setCity(prev => ({ ...prev, name: fetchedName }));
         });
       }
       setManualLat(lat.toString());
       setManualLng(lng.toString());
     } else {
+      // 即使没有坐标，也可以应用自定义名称和标语
+      if (nameParam || descParam) {
+        setCity(prev => ({
+          ...prev,
+          name: nameParam || prev.name,
+          description: descParam !== null ? descParam : prev.description
+        }));
+      }
+
       // 如果没有 URL 参数，尝试获取当前地理位置
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -72,10 +90,16 @@ const App: React.FC = () => {
             const currentLng = position.coords.longitude;
             setManualLat(currentLat.toFixed(6));
             setManualLng(currentLng.toFixed(6));
-            setCity(prev => ({ ...prev, lat: currentLat, lng: currentLng, id: 'custom', name: '加载中...' }));
-            fetchCityName(currentLat, currentLng, al || 'city').then(fetchedName => {
-              setCity(prev => ({ ...prev, lat: currentLat, lng: currentLng, id: 'custom', name: fetchedName }));
-            });
+
+            // 只有在没提供 nameParam 时才自动获取并设置
+            if (!nameParam) {
+              setCity(prev => ({ ...prev, lat: currentLat, lng: currentLng, id: 'custom', name: '加载中...' }));
+              fetchCityName(currentLat, currentLng, al || 'city').then(fetchedName => {
+                setCity(prev => ({ ...prev, lat: currentLat, lng: currentLng, id: 'custom', name: fetchedName }));
+              });
+            } else {
+              setCity(prev => ({ ...prev, lat: currentLat, lng: currentLng, id: 'custom' }));
+            }
           },
           (error) => {
             console.error("Error getting location:", error);
